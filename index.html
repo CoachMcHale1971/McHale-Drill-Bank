@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beach Volleyball Drill Library</title>
+    <title>McHale Drill Bank</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -170,28 +170,6 @@
             margin-right: 5px;
             margin-bottom: 0;
         }
-        .rating {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
-        }
-        .rating input {
-            display: none;
-        }
-        .rating label {
-            cursor: pointer;
-            width: 30px;
-            height: 30px;
-            background-color: #ddd;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .rating input:checked + label {
-            background-color: #0066cc;
-            color: white;
-        }
         .drill-detail {
             white-space: pre-line;
         }
@@ -206,6 +184,28 @@
         }
         .export-import > div {
             flex: 1;
+        }
+        .status-message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .storage-info {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #ddd;
         }
         /* Mobile optimizations */
         @media (max-width: 600px) {
@@ -245,29 +245,29 @@
 </head>
 <body>
     <div class="container">
-        <h1>Beach Volleyball Drill Library</h1>
+        <h1>McHale Drill Bank</h1>
         
         <div class="tabs">
-            <div class="tab active" onclick="openTab('library')">Drill Library</div>
-            <div class="tab" onclick="openTab('add')">Add New Drill</div>
-            <div class="tab" onclick="openTab('backup')">Backup/Restore</div>
+            <div class="tab active" onclick="app.openTab('library')">Drill Library</div>
+            <div class="tab" onclick="app.openTab('add')">Add New Drill</div>
+            <div class="tab" onclick="app.openTab('backup')">Backup/Restore</div>
         </div>
         
         <div id="library" class="tab-content active">
             <div class="search-area">
-                <input type="text" id="search-input" placeholder="Search by name or keyword..." oninput="filterDrills()">
-                <button onclick="filterDrills()">Search</button>
+                <input type="text" id="search-input" placeholder="Search by name or keyword..." oninput="app.filterDrills()">
+                <button onclick="app.filterDrills()">Search</button>
             </div>
             
             <div class="filter-options">
-                <select id="filter-skill" onchange="filterDrills()">
+                <select id="filter-skill" onchange="app.filterDrills()">
                     <option value="">All Skill Levels</option>
                     <option value="beginner">Beginner</option>
                     <option value="intermediate">Intermediate</option>
                     <option value="advanced">Advanced</option>
                 </select>
                 
-                <select id="filter-focus" onchange="filterDrills()">
+                <select id="filter-focus" onchange="app.filterDrills()">
                     <option value="">All Focus Areas</option>
                     <option value="passing">Passing</option>
                     <option value="setting">Setting</option>
@@ -278,7 +278,7 @@
                     <option value="footwork">Footwork</option>
                 </select>
                 
-                <select id="filter-players" onchange="filterDrills()">
+                <select id="filter-players" onchange="app.filterDrills()">
                     <option value="">Any # of Players</option>
                     <option value="1">1 Player</option>
                     <option value="2">2 Players</option>
@@ -287,6 +287,7 @@
                 </select>
             </div>
             
+            <div id="status-message"></div>
             <div id="drills-container"></div>
         </div>
         
@@ -311,7 +312,7 @@
                     </select>
                     
                     <label>Additional Skills (Check all that apply):</label>
-                    <div class="checkbox-group">
+                    <div class="checkbox-group" id="skill-tags">
                         <label class="checkbox-label"><input type="checkbox" name="skill-tags" value="passing"> Passing</label>
                         <label class="checkbox-label"><input type="checkbox" name="skill-tags" value="setting"> Setting</label>
                         <label class="checkbox-label"><input type="checkbox" name="skill-tags" value="hitting"> Hitting</label>
@@ -359,9 +360,11 @@
                 </div>
                 
                 <div>
-                    <button type="submit">Save Drill</button>
+                    <button type="submit" id="save-drill-btn">Save Drill</button>
                     <button type="reset" class="secondary">Clear Form</button>
                 </div>
+                
+                <div id="form-status"></div>
             </form>
         </div>
         
@@ -371,311 +374,494 @@
             <div class="export-import">
                 <div>
                     <h3>Export Your Drill Library</h3>
-                    <p>Download all your drills as a backup file:</p>
-                    <button onclick="exportDrills()">Export Drills</button>
+                    <p>Copy all your drills to move to another device:</p>
+                    <button onclick="app.exportDrills()">Export Drills</button>
                     <div id="export-result"></div>
+                    <textarea id="export-data" rows="10" placeholder="Your exported data will appear here..." readonly></textarea>
                 </div>
                 
                 <div>
                     <h3>Import Drill Library</h3>
                     <p>Import previously exported drills:</p>
-                    <textarea id="import-data" placeholder="Paste exported data here..."></textarea>
-                    <button onclick="importDrills()">Import Drills</button>
+                    <textarea id="import-data" rows="10" placeholder="Paste exported data here..."></textarea>
+                    <button onclick="app.importDrills()">Import Drills</button>
                     <div id="import-result"></div>
                 </div>
+            </div>
+            
+            <div class="storage-info">
+                <h3>Storage Status</h3>
+                <div id="storage-status"></div>
+                <button onclick="app.checkStorage()" class="secondary">Check Storage</button>
             </div>
         </div>
     </div>
     
     <script>
-        // Initialize data
-        let drills = JSON.parse(localStorage.getItem('volleyballDrills')) || [];
-        
-        // Generate a unique ID
-        function generateId() {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2);
-        }
-        
-        // Open tab function
-        function openTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
+        // Main application object to avoid global namespace pollution
+        const app = {
+            // Data storage
+            drills: [],
             
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            document.getElementById(tabName).classList.add('active');
-            document.querySelector(`.tab[onclick="openTab('${tabName}')"]`).classList.add('active');
-            
-            if (tabName === 'library') {
-                displayDrills();
-            }
-        }
-        
-        // Filter drills function
-        function filterDrills() {
-            const searchTerm = document.getElementById('search-input').value.toLowerCase();
-            const skillLevel = document.getElementById('filter-skill').value;
-            const focusArea = document.getElementById('filter-focus').value;
-            const playerCount = document.getElementById('filter-players').value;
-            
-            const filteredDrills = drills.filter(drill => {
-                // Search term filter
-                const matchesSearch = 
-                    drill.name.toLowerCase().includes(searchTerm) ||
-                    drill.description.toLowerCase().includes(searchTerm) ||
-                    (drill.tags && drill.tags.some(tag => tag.toLowerCase().includes(searchTerm)));
+            // Initialize the application
+            init: function() {
+                console.log('Initializing McHale Drill Bank...');
                 
-                // Skill level filter
-                const matchesSkill = !skillLevel || drill.level === skillLevel || drill.level === 'all';
+                // Try to load saved drills
+                this.loadDrills();
                 
-                // Focus area filter
-                const matchesFocus = !focusArea || 
-                    drill.focus === focusArea || 
-                    (drill.tags && drill.tags.includes(focusArea));
+                // Set up event listeners
+                this.setupEventListeners();
                 
-                // Player count filter
-                const matchesPlayers = !playerCount || drill.players.startsWith(playerCount);
+                // Display initial drills
+                this.displayDrills();
                 
-                return matchesSearch && matchesSkill && matchesFocus && matchesPlayers;
-            });
+                // Check storage availability
+                this.checkStorage();
+                
+                console.log('Initialization complete.');
+            },
             
-            displayDrills(filteredDrills);
-        }
-        
-        // Display drills in the library
-        function displayDrills(filteredDrills = null) {
-            const drillsContainer = document.getElementById('drills-container');
-            const drillsToDisplay = filteredDrills || drills;
-
-            drillsContainer.innerHTML = '';
+            // Load drills from localStorage
+            loadDrills: function() {
+                try {
+                    const savedDrills = localStorage.getItem('mchaleDrills');
+                    if (savedDrills) {
+                        this.drills = JSON.parse(savedDrills);
+                        console.log(`Loaded ${this.drills.length} drills from storage.`);
+                    } else {
+                        console.log('No saved drills found.');
+                        this.drills = [];
+                    }
+                } catch (e) {
+                    console.error('Error loading drills:', e);
+                    this.showStatus('error', 'There was an error loading your drills. Storage might be disabled.');
+                    this.drills = [];
+                }
+            },
             
-            if (drillsToDisplay.length === 0) {
-                drillsContainer.innerHTML = '<div class="no-results">No drills found. Add some drills to get started!</div>';
-                return;
-            }
+            // Save drills to localStorage
+            saveDrills: function() {
+                try {
+                    localStorage.setItem('mchaleDrills', JSON.stringify(this.drills));
+                    console.log(`Saved ${this.drills.length} drills to storage.`);
+                    return true;
+                } catch (e) {
+                    console.error('Error saving drills:', e);
+                    this.showStatus('error', 'Failed to save drills. Your browser storage might be full or disabled.');
+                    return false;
+                }
+            },
             
-            drillsToDisplay.forEach(drill => {
-                const drillCard = document.createElement('div');
-                drillCard.className = 'drill-card';
-                drillCard.innerHTML = `
-                    <div class="drill-controls">
-                        <button onclick="editDrill('${drill.id}')" class="secondary">Edit</button>
-                        <button onclick="deleteDrill('${drill.id}')" class="danger">Delete</button>
-                    </div>
-                    <h3>${drill.name}</h3>
-                    <p><strong>Focus:</strong> ${drill.focus}</p>
-                    <p><strong>Level:</strong> ${drill.level} | <strong>Players:</strong> ${drill.players} | <strong>Duration:</strong> ${drill.duration} minutes</p>
-                    <p><strong>Equipment:</strong> ${drill.equipment || 'None specified'}</p>
-                    
-                    <div class="drill-detail">
-                        <strong>Description:</strong>
-                        <p>${drill.description}</p>
-                        
-                        ${drill.progression ? `<strong>Progressions:</strong><p>${drill.progression}</p>` : ''}
-                        ${drill.coaching ? `<strong>Coaching Points:</strong><p>${drill.coaching}</p>` : ''}
-                    </div>
-                    
-                    <div class="drill-tags">
-                        ${drill.tags ? drill.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
-                    </div>
-                `;
-                drillsContainer.appendChild(drillCard);
-            });
-        }
-        
-        // Save a new drill
-        document.getElementById('drill-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Collect form values
-            const name = document.getElementById('drill-name').value;
-            const focus = document.getElementById('drill-focus').value;
-            const level = document.getElementById('drill-level').value;
-            const players = document.getElementById('drill-players').value;
-            const duration = document.getElementById('drill-duration').value;
-            const equipment = document.getElementById('drill-equipment').value;
-            const description = document.getElementById('drill-description').value;
-            const progression = document.getElementById('drill-progression').value;
-            const coaching = document.getElementById('drill-coaching').value;
-            
-            // Collect tags (checked skill checkboxes)
-            const tagElements = document.querySelectorAll('input[name="skill-tags"]:checked');
-            const tags = Array.from(tagElements).map(el => el.value);
-            
-            // Make sure primary focus is included in tags
-            if (!tags.includes(focus)) {
-                tags.push(focus);
-            }
-            
-            // Check if we're editing an existing drill
-            const editId = this.dataset.editId;
-            
-            if (editId) {
-                // Update existing drill
-                const drillIndex = drills.findIndex(d => d.id === editId);
-                if (drillIndex !== -1) {
-                    drills[drillIndex] = {
-                        id: editId,
-                        name,
-                        focus,
-                        level,
-                        players,
-                        duration,
-                        equipment,
-                        description,
-                        progression,
-                        coaching,
-                        tags,
-                        dateModified: new Date().toISOString()
-                    };
+            // Set up event listeners
+            setupEventListeners: function() {
+                // Form submission
+                const drillForm = document.getElementById('drill-form');
+                if (drillForm) {
+                    drillForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.saveDrillFromForm();
+                        return false;
+                    });
+                } else {
+                    console.error('Drill form not found!');
                 }
                 
-                // Reset form
-                this.removeAttribute('data-edit-id');
-                document.querySelector('#add h2').textContent = 'Add New Drill';
-                document.querySelector('#drill-form button[type="submit"]').textContent = 'Save Drill';
-            } else {
-                // Create new drill object
-                const newDrill = {
-                    id: generateId(),
-                    name,
-                    focus,
-                    level,
-                    players,
-                    duration,
-                    equipment,
-                    description,
-                    progression,
-                    coaching,
-                    tags,
-                    dateCreated: new Date().toISOString(),
-                    dateModified: new Date().toISOString()
+                // Add manual save button handler (extra reliability)
+                const saveBtn = document.getElementById('save-drill-btn');
+                if (saveBtn) {
+                    saveBtn.addEventListener('click', (e) => {
+                        // This is redundant with the form submit handler,
+                        // but provides a fallback if the form submission fails
+                        e.preventDefault();
+                        this.saveDrillFromForm();
+                    });
+                }
+            },
+            
+            // Generate a unique ID
+            generateId: function() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            },
+            
+            // Open tab function
+            openTab: function(tabName) {
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                document.getElementById(tabName).classList.add('active');
+                document.querySelector(`.tab[onclick="app.openTab('${tabName}')"]`).classList.add('active');
+                
+                if (tabName === 'library') {
+                    this.displayDrills();
+                }
+                
+                if (tabName === 'backup') {
+                    this.checkStorage();
+                }
+            },
+            
+            // Filter drills function
+            filterDrills: function() {
+                const searchTerm = document.getElementById('search-input').value.toLowerCase();
+                const skillLevel = document.getElementById('filter-skill').value;
+                const focusArea = document.getElementById('filter-focus').value;
+                const playerCount = document.getElementById('filter-players').value;
+                
+                const filteredDrills = this.drills.filter(drill => {
+                    // Search term filter
+                    const matchesSearch = 
+                        drill.name.toLowerCase().includes(searchTerm) ||
+                        drill.description.toLowerCase().includes(searchTerm) ||
+                        (drill.tags && drill.tags.some(tag => tag.toLowerCase().includes(searchTerm)));
+                    
+                    // Skill level filter
+                    const matchesSkill = !skillLevel || drill.level === skillLevel || drill.level === 'all';
+                    
+                    // Focus area filter
+                    const matchesFocus = !focusArea || 
+                        drill.focus === focusArea || 
+                        (drill.tags && drill.tags.includes(focusArea));
+                    
+                    // Player count filter
+                    const matchesPlayers = !playerCount || drill.players.startsWith(playerCount);
+                    
+                    return matchesSearch && matchesSkill && matchesFocus && matchesPlayers;
+                });
+                
+                this.displayDrills(filteredDrills);
+            },
+            
+            // Display drills in the library
+            displayDrills: function(filteredDrills = null) {
+                const drillsContainer = document.getElementById('drills-container');
+                if (!drillsContainer) {
+                    console.error('Drills container not found!');
+                    return;
+                }
+                
+                const drillsToDisplay = filteredDrills || this.drills;
+                drillsContainer.innerHTML = '';
+                
+                if (drillsToDisplay.length === 0) {
+                    drillsContainer.innerHTML = '<div class="no-results">No drills found. Add some drills to get started!</div>';
+                    return;
+                }
+                
+                drillsToDisplay.forEach(drill => {
+                    const drillCard = document.createElement('div');
+                    drillCard.className = 'drill-card';
+                    drillCard.innerHTML = `
+                        <div class="drill-controls">
+                            <button onclick="app.editDrill('${drill.id}')" class="secondary">Edit</button>
+                            <button onclick="app.deleteDrill('${drill.id}')" class="danger">Delete</button>
+                        </div>
+                        <h3>${drill.name}</h3>
+                        <p><strong>Focus:</strong> ${drill.focus}</p>
+                        <p><strong>Level:</strong> ${drill.level} | <strong>Players:</strong> ${drill.players} | <strong>Duration:</strong> ${drill.duration} minutes</p>
+                        <p><strong>Equipment:</strong> ${drill.equipment || 'None specified'}</p>
+                        
+                        <div class="drill-detail">
+                            <strong>Description:</strong>
+                            <p>${drill.description}</p>
+                            
+                            ${drill.progression ? `<strong>Progressions:</strong><p>${drill.progression}</p>` : ''}
+                            ${drill.coaching ? `<strong>Coaching Points:</strong><p>${drill.coaching}</p>` : ''}
+                        </div>
+                        
+                        <div class="drill-tags">
+                            ${drill.tags ? drill.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
+                        </div>
+                    `;
+                    drillsContainer.appendChild(drillCard);
+                });
+            },
+            
+            // Save a drill from the form
+            saveDrillFromForm: function() {
+                // Get form elements
+                const elements = {
+                    name: document.getElementById('drill-name'),
+                    focus: document.getElementById('drill-focus'),
+                    level: document.getElementById('drill-level'),
+                    players: document.getElementById('drill-players'),
+                    duration: document.getElementById('drill-duration'),
+                    equipment: document.getElementById('drill-equipment'),
+                    description: document.getElementById('drill-description'),
+                    progression: document.getElementById('drill-progression'),
+                    coaching: document.getElementById('drill-coaching')
                 };
                 
-                // Add to drills array
-                drills.push(newDrill);
-            }
-            
-            // Save to localStorage
-            localStorage.setItem('volleyballDrills', JSON.stringify(drills));
-            
-            // Reset form
-            this.reset();
-            
-            // Show the library tab with the new drill
-            openTab('library');
-            
-            return false;
-        });
-        
-        // Edit a drill
-        function editDrill(id) {
-            const drill = drills.find(d => d.id === id);
-            if (!drill) return;
-            
-            // Fill form with drill data
-            document.getElementById('drill-name').value = drill.name;
-            document.getElementById('drill-focus').value = drill.focus;
-            document.getElementById('drill-level').value = drill.level;
-            document.getElementById('drill-players').value = drill.players;
-            document.getElementById('drill-duration').value = drill.duration;
-            document.getElementById('drill-equipment').value = drill.equipment || '';
-            document.getElementById('drill-description').value = drill.description;
-            document.getElementById('drill-progression').value = drill.progression || '';
-            document.getElementById('drill-coaching').value = drill.coaching || '';
-            
-            // Reset checkboxes
-            document.querySelectorAll('input[name="skill-tags"]').forEach(checkbox => {
-                checkbox.checked = drill.tags && drill.tags.includes(checkbox.value);
-            });
-            
-            // Set form to edit mode
-            document.getElementById('drill-form').dataset.editId = id;
-            document.querySelector('#add h2').textContent = 'Edit Drill';
-            document.querySelector('#drill-form button[type="submit"]').textContent = 'Update Drill';
-            
-            // Switch to add/edit tab
-            openTab('add');
-        }
-        
-        // Delete a drill
-        function deleteDrill(id) {
-            if (confirm('Are you sure you want to delete this drill?')) {
-                drills = drills.filter(drill => drill.id !== id);
-                localStorage.setItem('volleyballDrills', JSON.stringify(drills));
-                displayDrills();
-            }
-        }
-        
-        // Export drills to JSON
-        function exportDrills() {
-            const exportData = JSON.stringify(drills);
-            
-            // Create a download link
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(exportData);
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "volleyball_drills_backup_" + new Date().toISOString().split('T')[0] + ".json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-            
-            document.getElementById('export-result').innerHTML = '<p style="color: green;">Export successful! Your file is downloading.</p>';
-        }
-        
-        // Import drills from JSON
-        function importDrills() {
-            const importData = document.getElementById('import-data').value.trim();
-            
-            if (!importData) {
-                document.getElementById('import-result').innerHTML = '<p style="color: red;">Please paste export data first!</p>';
-                return;
-            }
-            
-            try {
-                const importedDrills = JSON.parse(importData);
-                
-                if (Array.isArray(importedDrills)) {
-                    // Ask if user wants to replace or merge
-                    const importAction = confirm('Do you want to merge these drills with your existing ones? Click OK to merge, or Cancel to replace all existing drills.');
-                    
-                    if (importAction) {
-                        // Merge - add new drills, update existing ones by ID
-                        importedDrills.forEach(importedDrill => {
-                            const existingIndex = drills.findIndex(d => d.id === importedDrill.id);
-                            if (existingIndex !== -1) {
-                                drills[existingIndex] = importedDrill;
-                            } else {
-                                drills.push(importedDrill);
-                            }
-                        });
-                    } else {
-                        // Replace all
-                        drills = importedDrills;
-                    }
-                    
-                    // Save to localStorage
-                    localStorage.setItem('volleyballDrills', JSON.stringify(drills));
-                    
-                    document.getElementById('import-result').innerHTML = '<p style="color: green;">Import successful! ' + importedDrills.length + ' drills imported.</p>';
-                    document.getElementById('import-data').value = '';
-                    
-                    // Refresh the library view
-                    if (document.querySelector('.tab.active').textContent === 'Drill Library') {
-                        displayDrills();
-                    }
-                } else {
-                    throw new Error('Invalid data format');
+                // Check required fields
+                if (!elements.name.value || !elements.description.value) {
+                    this.showFormStatus('error', 'Please fill out all required fields.');
+                    return;
                 }
-            } catch (error) {
-                document.getElementById('import-result').innerHTML = '<p style="color: red;">Import failed: Invalid JSON data format. Please check your import data.</p>';
+                
+                // Collect form values
+                const formData = {
+                    name: elements.name.value,
+                    focus: elements.focus.value,
+                    level: elements.level.value,
+                    players: elements.players.value,
+                    duration: elements.duration.value,
+                    equipment: elements.equipment.value,
+                    description: elements.description.value,
+                    progression: elements.progression.value,
+                    coaching: elements.coaching.value
+                };
+                
+                // Collect tags (checked skill checkboxes)
+                const tagElements = document.querySelectorAll('input[name="skill-tags"]:checked');
+                const tags = Array.from(tagElements).map(el => el.value);
+                
+                // Make sure primary focus is included in tags
+                if (!tags.includes(formData.focus)) {
+                    tags.push(formData.focus);
+                }
+                
+                // Get the form element for checking edit mode
+                const drillForm = document.getElementById('drill-form');
+                const editId = drillForm.dataset.editId;
+                
+                if (editId) {
+                    // Update existing drill
+                    const drillIndex = this.drills.findIndex(d => d.id === editId);
+                    if (drillIndex !== -1) {
+                        this.drills[drillIndex] = {
+                            id: editId,
+                            ...formData,
+                            tags,
+                            dateModified: new Date().toISOString()
+                        };
+                        
+                        // Preserve the original creation date
+                        if (this.drills[drillIndex].dateCreated) {
+                            this.drills[drillIndex].dateCreated = this.drills[drillIndex].dateCreated;
+                        } else {
+                            this.drills[drillIndex].dateCreated = new Date().toISOString();
+                        }
+                    }
+                    
+                    // Reset form
+                    drillForm.removeAttribute('data-edit-id');
+                    document.querySelector('#add h2').textContent = 'Add New Drill';
+                    document.querySelector('#save-drill-btn').textContent = 'Save Drill';
+                    
+                    this.showFormStatus('success', 'Drill updated successfully!');
+                } else {
+                    // Create new drill object
+                    const newDrill = {
+                        id: this.generateId(),
+                        ...formData,
+                        tags,
+                        dateCreated: new Date().toISOString(),
+                        dateModified: new Date().toISOString()
+                    };
+                    
+                    // Add to drills array
+                    this.drills.push(newDrill);
+                    
+                    this.showFormStatus('success', 'New drill added successfully!');
+                }
+                
+                // Save to localStorage
+                const saveSuccessful = this.saveDrills();
+                
+                if (saveSuccessful) {
+                    // Reset form
+                    drillForm.reset();
+                    
+                    // Show the library tab with the new drill
+                    setTimeout(() => {
+                        this.openTab('library');
+                    }, 1000); // Short delay so user can see success message
+                } else {
+                    this.showFormStatus('error', 'There was a problem saving your drill. Please check browser storage permissions.');
+                }
+            },
+            
+            // Edit a drill
+            editDrill: function(id) {
+                const drill = this.drills.find(d => d.id === id);
+                if (!drill) return;
+                
+                // Fill form with drill data
+                document.getElementById('drill-name').value = drill.name;
+                document.getElementById('drill-focus').value = drill.focus;
+                document.getElementById('drill-level').value = drill.level;
+                document.getElementById('drill-players').value = drill.players;
+                document.getElementById('drill-duration').value = drill.duration;
+                document.getElementById('drill-equipment').value = drill.equipment || '';
+                document.getElementById('drill-description').value = drill.description;
+                document.getElementById('drill-progression').value = drill.progression || '';
+                document.getElementById('drill-coaching').value = drill.coaching || '';
+                
+                // Reset checkboxes
+                document.querySelectorAll('input[name="skill-tags"]').forEach(checkbox => {
+                    checkbox.checked = drill.tags && drill.tags.includes(checkbox.value);
+                });
+                
+                // Set form to edit mode
+                document.getElementById('drill-form').dataset.editId = id;
+                document.querySelector('#add h2').textContent = 'Edit Drill';
+                document.querySelector('#save-drill-btn').textContent = 'Update Drill';
+                
+                // Switch to add/edit tab
+                this.openTab('add');
+            },
+            
+            // Delete a drill
+            deleteDrill: function(id) {
+                if (confirm('Are you sure you want to delete this drill?')) {
+                    this.drills = this.drills.filter(drill => drill.id !== id);
+                    this.saveDrills();
+                    this.displayDrills();
+                    this.showStatus('success', 'Drill deleted successfully.');
+                }
+            },
+            
+            // Export drills to JSON in textarea
+            exportDrills: function() {
+                const exportData = JSON.stringify(this.drills);
+                document.getElementById('export-data').value = exportData;
+                document.getElementById('export-result').innerHTML = '<div class="status-message status-success">Export successful! Copy the text below to save.</div>';
+            },
+            
+            // Import drills from JSON
+            importDrills: function() {
+                const importData = document.getElementById('import-data').value.trim();
+                
+                if (!importData) {
+                    document.getElementById('import-result').innerHTML = '<div class="status-message status-error">Please paste export data first!</div>';
+                    return;
+                }
+                
+                try {
+                    const importedDrills = JSON.parse(importData);
+                    
+                    if (Array.isArray(importedDrills)) {
+                        // Ask if user wants to replace or merge
+                        const importAction = confirm('Do you want to merge these drills with your existing ones? Click OK to merge, or Cancel to replace all existing drills.');
+                        
+                        if (importAction) {
+                            // Merge - add new drills, update existing ones by ID
+                            importedDrills.forEach(importedDrill => {
+                                const existingIndex = this.drills.findIndex(d => d.id === importedDrill.id);
+                                if (existingIndex !== -1) {
+                                    this.drills[existingIndex] = importedDrill;
+                                } else {
+                                    this.drills.push(importedDrill);
+                                }
+                            });
+                        } else {
+                            // Replace all
+                            this.drills = importedDrills;
+                        }
+                        
+                        // Save to localStorage
+                        this.saveDrills();
+                        
+                        document.getElementById('import-result').innerHTML = '<div class="status-message status-success">Import successful! ' + importedDrills.length + ' drills imported.</div>';
+                        document.getElementById('import-data').value = '';
+                        
+                        // Refresh the library view
+                        if (document.querySelector('.tab.active').textContent === 'Drill Library') {
+                            this.displayDrills();
+                        }
+                    } else {
+                        throw new Error('Invalid data format');
+                    }
+                } catch (error) {
+                    document.getElementById('import-result').innerHTML = '<div class="status-message status-error">Import failed: Invalid JSON data format. Please check your import data.</div>';
+                }
+            },
+            
+            // Check storage availability and show status
+            checkStorage: function() {
+                const storageStatus = document.getElementById('storage-status');
+                
+                try {
+                    // Test if localStorage is available
+                    localStorage.setItem('test', 'test');
+                    localStorage.removeItem('test');
+                    
+                    // If we got here, localStorage is available
+                    storageStatus.innerHTML = '<div class="status-message status-success">Storage is working properly. Your drills will be saved automatically.</div>';
+                    
+                    // Display storage usage
+                    const currentSize = JSON.stringify(this.drills).length;
+                    const estimatedMax = 5 * 1024 * 1024; // Typical localStorage limit is 5MB
+                    const percentUsed = ((currentSize / estimatedMax) * 100).toFixed(2);
+                    
+                    storageStatus.innerHTML += `
+                        <p>Current storage usage: ${this.formatBytes(currentSize)} 
+                        (approximately ${percentUsed}% of available local storage)</p>
+                        <p>You have ${this.drills.length} drills saved.</p>
+                    `;
+                    
+                } catch (e) {
+                    // localStorage is not available
+                    storageStatus.innerHTML = `
+                        <div class="status-message status-error">
+                            <strong>Storage Error:</strong> Your browser does not support or has disabled local storage.
+                            Your drills will not be saved between sessions.
+                            <p>Try these solutions:</p>
+                            <ul>
+                                <li>Make sure cookies and site data are enabled in your browser settings</li>
+                                <li>If using Private/Incognito mode, switch to regular browsing</li>
+                                <li>Some browsers have storage limits - export your drills regularly as backup</li>
+                            </ul>
+                        </div>
+                    `;
+                }
+            },
+            
+            // Format bytes into readable format
+            formatBytes: function(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            },
+            
+            // Show status message in the library view
+            showStatus: function(type, message) {
+                const statusElement = document.getElementById('status-message');
+                if (!statusElement) return;
+                
+                statusElement.innerHTML = `<div class="status-message status-${type}">${message}</div>`;
+                
+                // Clear message after 5 seconds
+                setTimeout(() => {
+                    statusElement.innerHTML = '';
+                }, 5000);
+            },
+            
+            // Show status message in the form
+            showFormStatus: function(type, message) {
+                const statusElement = document.getElementById('form-status');
+                if (!statusElement) return;
+                
+                statusElement.innerHTML = `<div class="status-message status-${type}">${message}</div>`;
+                
+                // Clear message after 5 seconds
+                setTimeout(() => {
+                    statusElement.innerHTML = '';
+                }, 5000);
             }
-        }
+        };
         
-        // Initialize the app
+        // Initialize the application when the DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
-            displayDrills();
+            app.init();
         });
+    </script>
+</body>
+</html>

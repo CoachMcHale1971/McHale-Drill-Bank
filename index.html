@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beach Volleyball Drill Library</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #0066cc;
+        }
+        h1 {
+            text-align: center;
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 10px;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-bottom: none;
+            background-color: #f1f1f1;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+            font-weight: bold;
+        }
+        .tab.active {
+            background-color: white;
+            border-bottom: 2px solid white;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 0 8px 8px 8px;
+            margin-top: -1px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        button {
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0052a3;
+        }
+        button.secondary {
+            background-color: #6c757d;
+        }
+        button.secondary:hover {
+            background-color: #5a6268;
+        }
+        button.danger {
+            background-color: #dc3545;
+        }
+        button.danger:hover {
+            background-color: #c82333;
+        }
+        .drill-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+            position: relative;
+        }
+        .drill-card h3 {
+            margin-top: 0;
+            color: #0066cc;
+        }
+        .drill-controls {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+        }
+        .drill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .tag {
+            background-color: #e9f5ff;
+            color: #0066cc;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            border: 1px solid #cce5ff;
+        }
+        .search-area {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .search-area input {
+            flex-grow: 1;
+            margin-bottom: 0;
+        }
+        .filter-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .filter-options select {
+            width: auto;
+            flex-grow: 1;
+            margin-bottom: 0;
+        }
+        .section {
+            margin-bottom: 25px;
+        }
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .checkbox-label input {
+            width: auto;
+            margin-right: 5px;
+            margin-bottom: 0;
+        }
+        .rating {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        .rating input {
+            display: none;
+        }
+        .rating label {
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            background-color: #ddd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .rating input:checked + label {
+            background-color: #0066cc;
+            color: white;
+        }
+        .drill-detail {
+            white-space: pre-line;
+        }
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        .export-import {
+            display: flex;
+            gap: 20px;
+        }
+        .export-import > div {
+            flex: 1;
+        }
+        /* Mobile optimizations */
+        @media (max-width: 600px) {
+            .tabs {
+                flex-direction: column;
+            }
+            .tab {
+                margin-right: 0;
+                margin-bottom: 5px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+            }
+            .tab.active {
+                border-bottom: 1px solid #0066cc;
+            }
+            .tab-content {
+                border-radius: 4px;
+                margin-top: 5px;
+            }
+            .filter-options {
+                flex-direction: column;
+            }
+            .filter-options select {
+                width: 100%;
+            }
+            .export-import {
+                flex-direction: column;
+            }
+            .drill-controls {
+                position: static;
+                margin-top: 10px;
+                display: flex;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Beach Volleyball Drill Library</h1>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="openTab('library')">Drill Library</div>
+            <div class="tab" onclick="openTab('add')">Add New Drill</div>
+            <div class="tab" onclick="openTab('backup')">Backup/Restore</div>
+        </div>
+        
+        <div id="library" class="tab-content active">
+            <div class="search-area">
+                <input type="text" id="search-input" placeholder="Search by name or keyword..." oninput="filterDrills()">
+                <button onclick="filterDrills()">Search</button>
+            </div>
+            
+            <div class="filter-options">
+                <select id="filter-skill" onchange="filterDrills()">
+                    <option value="">All Skill Levels</option>
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                </select>
+                
+                <select id="filter-focus" onchange="filterDrills()">
+                    <option value="">All Focus Areas</option>
+                    <option value="passing">Passing</option>
+                    <option value="setting">Setting</option>
+                    <option value="hitting">Hitting</option>
+                    <option value="serving">Serving</option>
+                    <option value="defense">Defense</option>
+                    <option value="conditioning">Conditioning</option>
+                    <option value="footwork">Footwork</option>
+                </select>
+                
+                <select id="filter-players" onchange="filterDrills()">
+                    <option value="">Any # of Players</option>
+                    <option value="1">1 Player</option>
+                    <option value="2">2 Players</option>
+                    <option value="3">3-4 Players</option>
+                    <option value="5">5+ Players</option>
+                </select>
+            </div>
+            
+            <div id="drills-container"></div>
+        </div>
+        
+        <div id="add" class="tab-content">
+            <h2>Add New Drill</h2>
+            <form id="drill-form">
+                <div class="section">
+                    <label for="drill-name">Drill Name:</label>
+                    <input type="text" id="drill-name" required>
+                    
+                    <label for="drill-focus">Primary Focus:</label>
+                    <select id="drill-focus" required>
+                        <option value="passing">Passing</option>
+                        <option value="setting">Setting</option>
+                        <option value="hitting">Hitting</option>
+                        <option value="serving">Serving</option>
+                        <option value="defense">Defense</option>
+                        <option value="conditioning">Conditioning</option>
+                        <option value="footwork">Footwork</option>
+                        <option value="communication">Communication</option>
+                        <option value="game-situation">Game Situation</option>
+                    </select>
+                    
+                    <label>Additional Skills (Check all that apply):</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label"><input type="checkbox" name="skill-tags" value="passing"> Passing</label>
+                        <label class="checkbox-label"><input type="checkbox" name="skill-tags" value="setting"> Setting</label>
+                        <label class="checkbox-label"><input type="checkbox" name="skill-tags" value="hitting"> Hitting</label>
+                        <label class="checkbox-label"><input type="checkbox" name="skill-tags" value="serving"> Serving</label>
+                        <label class="checkbox-label"><input type="checkbox" name="skill-tags" value="defense"> Defense</label>
+                        <label class="checkbox-label"><input type="checkbox" name="skill-tags" value="conditioning"> Conditioning</label>
+                        <label class="checkbox-label"><input type="checkbox" name="skill-tags" value="footwork"> Footwork</label>
+                        <label class="checkbox-label"><input type="checkbox" name="skill-tags" value="communication"> Communication</label>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <label for="drill-level">Skill Level:</label>
+                    <select id="drill-level" required>
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                        <option value="all">All Levels</option>
+                    </select>
+                    
+                    <label for="drill-players">Number of Players:</label>
+                    <select id="drill-players" required>
+                        <option value="1">1 (Solo)</option>
+                        <option value="2">2 (Pair)</option>
+                        <option value="3-4">3-4 Players</option>
+                        <option value="5+">5+ Players</option>
+                    </select>
+                    
+                    <label for="drill-duration">Duration (minutes):</label>
+                    <input type="number" id="drill-duration" min="1" max="60" value="10">
+                    
+                    <label for="drill-equipment">Equipment Needed:</label>
+                    <input type="text" id="drill-equipment" placeholder="e.g., 3 balls, cones, targets">
+                </div>
+                
+                <div class="section">
+                    <label for="drill-description">Description:</label>
+                    <textarea id="drill-description" required placeholder="Detailed description of the drill..."></textarea>
+                    
+                    <label for="drill-progression">Progressions (Optional):</label>
+                    <textarea id="drill-progression" placeholder="How to make this drill easier or more challenging..."></textarea>
+                    
+                    <label for="drill-coaching">Coaching Points (Optional):</label>
+                    <textarea id="drill-coaching" placeholder="Key elements to watch for, common mistakes..."></textarea>
+                </div>
+                
+                <div>
+                    <button type="submit">Save Drill</button>
+                    <button type="reset" class="secondary">Clear Form</button>
+                </div>
+            </form>
+        </div>
+        
+        <div id="backup" class="tab-content">
+            <h2>Backup and Restore Data</h2>
+            
+            <div class="export-import">
+                <div>
+                    <h3>Export Your Drill Library</h3>
+                    <p>Download all your drills as a backup file:</p>
+                    <button onclick="exportDrills()">Export Drills</button>
+                    <div id="export-result"></div>
+                </div>
+                
+                <div>
+                    <h3>Import Drill Library</h3>
+                    <p>Import previously exported drills:</p>
+                    <textarea id="import-data" placeholder="Paste exported data here..."></textarea>
+                    <button onclick="importDrills()">Import Drills</button>
+                    <div id="import-result"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize data
+        let drills = JSON.parse(localStorage.getItem('volleyballDrills')) || [];
+        
+        // Generate a unique ID
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+        
+        // Open tab function
+        function openTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`.tab[onclick="openTab('${tabName}')"]`).classList.add('active');
+            
+            if (tabName === 'library') {
+                displayDrills();
+            }
+        }
+        
+        // Filter drills function
+        function filterDrills() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const skillLevel = document.getElementById('filter-skill').value;
+            const focusArea = document.getElementById('filter-focus').value;
+            const playerCount = document.getElementById('filter-players').value;
+            
+            const filteredDrills = drills.filter(drill => {
+                // Search term filter
+                const matchesSearch = 
+                    drill.name.toLowerCase().includes(searchTerm) ||
+                    drill.description.toLowerCase().includes(searchTerm) ||
+                    (drill.tags && drill.tags.some(tag => tag.toLowerCase().includes(searchTerm)));
+                
+                // Skill level filter
+                const matchesSkill = !skillLevel || drill.level === skillLevel || drill.level === 'all';
+                
+                // Focus area filter
+                const matchesFocus = !focusArea || 
+                    drill.focus === focusArea || 
+                    (drill.tags && drill.tags.includes(focusArea));
+                
+                // Player count filter
+                const matchesPlayers = !playerCount || drill.players.startsWith(playerCount);
+                
+                return matchesSearch && matchesSkill && matchesFocus && matchesPlayers;
+            });
+            
+            displayDrills(filteredDrills);
+        }
+        
+        // Display drills in the library
+        function displayDrills(filteredDrills = null) {
+            const drillsContainer = document.getElementById('drills-container');
+            const drillsToDisplay = filteredDrills || drills;
+
+            drillsContainer.innerHTML = '';
+            
+            if (drillsToDisplay.length === 0) {
+                drillsContainer.innerHTML = '<div class="no-results">No drills found. Add some drills to get started!</div>';
+                return;
+            }
+            
+            drillsToDisplay.forEach(drill => {
+                const drillCard = document.createElement('div');
+                drillCard.className = 'drill-card';
+                drillCard.innerHTML = `
+                    <div class="drill-controls">
+                        <button onclick="editDrill('${drill.id}')" class="secondary">Edit</button>
+                        <button onclick="deleteDrill('${drill.id}')" class="danger">Delete</button>
+                    </div>
+                    <h3>${drill.name}</h3>
+                    <p><strong>Focus:</strong> ${drill.focus}</p>
+                    <p><strong>Level:</strong> ${drill.level} | <strong>Players:</strong> ${drill.players} | <strong>Duration:</strong> ${drill.duration} minutes</p>
+                    <p><strong>Equipment:</strong> ${drill.equipment || 'None specified'}</p>
+                    
+                    <div class="drill-detail">
+                        <strong>Description:</strong>
+                        <p>${drill.description}</p>
+                        
+                        ${drill.progression ? `<strong>Progressions:</strong><p>${drill.progression}</p>` : ''}
+                        ${drill.coaching ? `<strong>Coaching Points:</strong><p>${drill.coaching}</p>` : ''}
+                    </div>
+                    
+                    <div class="drill-tags">
+                        ${drill.tags ? drill.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
+                    </div>
+                `;
+                drillsContainer.appendChild(drillCard);
+            });
+        }
+        
+        // Save a new drill
+        document.getElementById('drill-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Collect form values
+            const name = document.getElementById('drill-name').value;
+            const focus = document.getElementById('drill-focus').value;
+            const level = document.getElementById('drill-level').value;
+            const players = document.getElementById('drill-players').value;
+            const duration = document.getElementById('drill-duration').value;
+            const equipment = document.getElementById('drill-equipment').value;
+            const description = document.getElementById('drill-description').value;
+            const progression = document.getElementById('drill-progression').value;
+            const coaching = document.getElementById('drill-coaching').value;
+            
+            // Collect tags (checked skill checkboxes)
+            const tagElements = document.querySelectorAll('input[name="skill-tags"]:checked');
+            const tags = Array.from(tagElements).map(el => el.value);
+            
+            // Make sure primary focus is included in tags
+            if (!tags.includes(focus)) {
+                tags.push(focus);
+            }
+            
+            // Check if we're editing an existing drill
+            const editId = this.dataset.editId;
+            
+            if (editId) {
+                // Update existing drill
+                const drillIndex = drills.findIndex(d => d.id === editId);
+                if (drillIndex !== -1) {
+                    drills[drillIndex] = {
+                        id: editId,
+                        name,
+                        focus,
+                        level,
+                        players,
+                        duration,
+                        equipment,
+                        description,
+                        progression,
+                        coaching,
+                        tags,
+                        dateModified: new Date().toISOString()
+                    };
+                }
+                
+                // Reset form
+                this.removeAttribute('data-edit-id');
+                document.querySelector('#add h2').textContent = 'Add New Drill';
+                document.querySelector('#drill-form button[type="submit"]').textContent = 'Save Drill';
+            } else {
+                // Create new drill object
+                const newDrill = {
+                    id: generateId(),
+                    name,
+                    focus,
+                    level,
+                    players,
+                    duration,
+                    equipment,
+                    description,
+                    progression,
+                    coaching,
+                    tags,
+                    dateCreated: new Date().toISOString(),
+                    dateModified: new Date().toISOString()
+                };
+                
+                // Add to drills array
+                drills.push(newDrill);
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('volleyballDrills', JSON.stringify(drills));
+            
+            // Reset form
+            this.reset();
+            
+            // Show the library tab with the new drill
+            openTab('library');
+            
+            return false;
+        });
+        
+        // Edit a drill
+        function editDrill(id) {
+            const drill = drills.find(d => d.id === id);
+            if (!drill) return;
+            
+            // Fill form with drill data
+            document.getElementById('drill-name').value = drill.name;
+            document.getElementById('drill-focus').value = drill.focus;
+            document.getElementById('drill-level').value = drill.level;
+            document.getElementById('drill-players').value = drill.players;
+            document.getElementById('drill-duration').value = drill.duration;
+            document.getElementById('drill-equipment').value = drill.equipment || '';
+            document.getElementById('drill-description').value = drill.description;
+            document.getElementById('drill-progression').value = drill.progression || '';
+            document.getElementById('drill-coaching').value = drill.coaching || '';
+            
+            // Reset checkboxes
+            document.querySelectorAll('input[name="skill-tags"]').forEach(checkbox => {
+                checkbox.checked = drill.tags && drill.tags.includes(checkbox.value);
+            });
+            
+            // Set form to edit mode
+            document.getElementById('drill-form').dataset.editId = id;
+            document.querySelector('#add h2').textContent = 'Edit Drill';
+            document.querySelector('#drill-form button[type="submit"]').textContent = 'Update Drill';
+            
+            // Switch to add/edit tab
+            openTab('add');
+        }
+        
+        // Delete a drill
+        function deleteDrill(id) {
+            if (confirm('Are you sure you want to delete this drill?')) {
+                drills = drills.filter(drill => drill.id !== id);
+                localStorage.setItem('volleyballDrills', JSON.stringify(drills));
+                displayDrills();
+            }
+        }
+        
+        // Export drills to JSON
+        function exportDrills() {
+            const exportData = JSON.stringify(drills);
+            
+            // Create a download link
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(exportData);
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "volleyball_drills_backup_" + new Date().toISOString().split('T')[0] + ".json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            
+            document.getElementById('export-result').innerHTML = '<p style="color: green;">Export successful! Your file is downloading.</p>';
+        }
+        
+        // Import drills from JSON
+        function importDrills() {
+            const importData = document.getElementById('import-data').value.trim();
+            
+            if (!importData) {
+                document.getElementById('import-result').innerHTML = '<p style="color: red;">Please paste export data first!</p>';
+                return;
+            }
+            
+            try {
+                const importedDrills = JSON.parse(importData);
+                
+                if (Array.isArray(importedDrills)) {
+                    // Ask if user wants to replace or merge
+                    const importAction = confirm('Do you want to merge these drills with your existing ones? Click OK to merge, or Cancel to replace all existing drills.');
+                    
+                    if (importAction) {
+                        // Merge - add new drills, update existing ones by ID
+                        importedDrills.forEach(importedDrill => {
+                            const existingIndex = drills.findIndex(d => d.id === importedDrill.id);
+                            if (existingIndex !== -1) {
+                                drills[existingIndex] = importedDrill;
+                            } else {
+                                drills.push(importedDrill);
+                            }
+                        });
+                    } else {
+                        // Replace all
+                        drills = importedDrills;
+                    }
+                    
+                    // Save to localStorage
+                    localStorage.setItem('volleyballDrills', JSON.stringify(drills));
+                    
+                    document.getElementById('import-result').innerHTML = '<p style="color: green;">Import successful! ' + importedDrills.length + ' drills imported.</p>';
+                    document.getElementById('import-data').value = '';
+                    
+                    // Refresh the library view
+                    if (document.querySelector('.tab.active').textContent === 'Drill Library') {
+                        displayDrills();
+                    }
+                } else {
+                    throw new Error('Invalid data format');
+                }
+            } catch (error) {
+                document.getElementById('import-result').innerHTML = '<p style="color: red;">Import failed: Invalid JSON data format. Please check your import data.</p>';
+            }
+        }
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            displayDrills();
+        });
